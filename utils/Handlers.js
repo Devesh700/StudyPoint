@@ -14,7 +14,7 @@ class APIError extends Error{
               this.statusCode=statusCode;
               this.errors=errors;
               this.message=message;
-              this.success=false;
+              this.ok=false;
 
               if(stack){
                 this.stack=stack;
@@ -31,7 +31,7 @@ class APIResponse{
     this.statusCode=statusCode;
     this.data=data;
     this.message=message;
-    this.ok=ok;
+    this.ok=ok?ok:true;
   }
 }
 

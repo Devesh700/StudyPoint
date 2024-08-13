@@ -4,14 +4,30 @@ const ArticleSchema=new mongoose.Schema({
         type:String,
         required:[true,"title field required"]
     },
-    author:{
+    postedBy:{
         type:mongoose.Schema.Types.ObjectId,
-        ref:User,
+        ref:"User",
         required:[true,"author field required"]
     },
-    content:{
+    description:{
         type:String,
         required:[true,"content field required"]
+    },
+    likeCount:{
+        type:Number,
+        default:0
+    },
+    comments:{
+        type:[
+            {
+                type:mongoose.Schema.Types.ObjectId,
+                ref:"Comment"
+            }
+        ]
+    },
+    post:{
+        type:String,
+        default:undefined
     }
 },{timestamps:true});
 module.exports=mongoose.model("Article",ArticleSchema);
