@@ -4,7 +4,9 @@ const logInValidator = [
     check("email", "Invalid email").isEmail(),
     check("password", "Password required").notEmpty(),
     (req, res, next) => {
+        console.log("checking errors")
         const errors = validationResult(req);
+        console.log("errors->",errors)
         if (!errors.isEmpty()) {
             return res.status(400).json({ errors: errors.array() });
         }

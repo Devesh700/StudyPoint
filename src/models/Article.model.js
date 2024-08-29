@@ -13,9 +13,13 @@ const ArticleSchema=new mongoose.Schema({
         type:String,
         required:[true,"content field required"]
     },
-    likeCount:{
-        type:Number,
-        default:0
+    likes:{
+        type:[
+            {
+                type:mongoose.Schema.Types.ObjectId,
+                ref:"Like"
+            }
+        ]
     },
     comments:{
         type:[

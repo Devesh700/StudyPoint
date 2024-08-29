@@ -4,6 +4,8 @@ const cors=require("cors")
 const Db=require("./src/config/DB");
 const userRouter=require("./src/routes/userRouter")
 const articleRouter=require("./src/routes/articleRouter")
+const SkillTitleRouter=require("./src/routes/skillTitleRouter")
+const topicRouter=require("./src/routes/topicRouter")
 const app=express();
 require("dotenv").config();
 const PORT=process.env.PORT || 4000;
@@ -28,5 +30,7 @@ Db();
 
 app.use("/api/v1/article",articleRouter)
 app.use("/api/v1/users",userRouter)
+app.use("/api/v1/skilltitle",SkillTitleRouter)
+app.use("/api/v1/topics",topicRouter)
 
 app.listen(PORT,()=>console.log(`server is running on PORT: ${PORT}`));
