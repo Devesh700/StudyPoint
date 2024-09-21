@@ -4,6 +4,10 @@ const ArticleSchema=new mongoose.Schema({
         type:String,
         required:[true,"title field required"]
     },
+    technology:{
+        type:String,
+        required:[true,"technology field required"]
+    },
     postedBy:{
         type:mongoose.Schema.Types.ObjectId,
         ref:"User",

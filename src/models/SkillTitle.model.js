@@ -1,46 +1,56 @@
-const mongoose=require("mongoose");
-const SkillTitleSchema=mongoose.Schema({
-    title:{
-        type:String,
-        required:true,
-        validate:{
-            validator:(v)=>/^[a-zA-z\s'`]+$/.test(v),
-            message:(props)=>`please enter a valid title title must be a string your provided input${props.value}`
+const mongoose = require("mongoose");
+
+const SkillTitleSchema = mongoose.Schema({
+    title: {
+        type: String,
+        required: true,
+        validate: {
+            validator: (v) => /^[a-zA-Z\s'`]+$/.test(v),
+            message: (props) => `Please enter a valid title. Your provided input: ${props.value}`
         }
     },
-    subTitle:{
-        type:[
+    subTitle: [
+        {
+        name:String,
+        Topics:[
             {
-            type:String,
-            validate:{
-            validator:(v)=>/^[a-zA-z\s'`]+$/.test(v),
-            message:(props)=>`please enter a valid title title must be a string your provided input${props.value}`
-            }
-        }
-        ],
-        required:true,
-        
-    },
-    postedBy:{
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"User"
-    },
-    topics:{
-        type:[
-            {
-                type:mongoose.Schema.Types.ObjectId,
-                ref:"Topic"
+                id:{
+                    type:mongoose.Schema.Types.ObjectId,
+                    ref:"Topic",
+                },
+                name:String
             }
         ]
     },
-    // subTitles:{
-    //     type:[
-    //         {
-    //             type:mongoose.Schema.Types.ObjectId,
-    //             ref:"SubTitle"
-    //         }
-    //     ]
-    // }
-},{timestamps:true});
+        {
+        name:String,
+        Topics:[
+            {
+                id:{
+                    type:mongoose.Schema.Types.ObjectId,
+                    ref:"Topic",
+                },
+                name:String
+            }
+        ]
+    },
+        {
+        name:String,
+        Topics:[
+            {
+                id:{
+                    type:mongoose.Schema.Types.ObjectId,
+                    ref:"Topic",
+                },
+                name:String
+            }
+        ]
+    },
+    ],
+    postedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
+    }
+}, { timestamps: true });
 
-module.exports=mongoose.model("SkillTitle",SkillTitleSchema);
+module.exports = mongoose.model("SkillTitle", SkillTitleSchema);

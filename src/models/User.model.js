@@ -3,6 +3,10 @@ const jwt=require("jsonwebtoken");
 const bcrypt=require("bcryptjs");
 require("dotenv").config();
 const UserSchema=new mongoose.Schema({
+    admin:{
+        type:Boolean,
+        default:false
+    },
     fullName:{
         type:String,
         required:[true,"name field required"],

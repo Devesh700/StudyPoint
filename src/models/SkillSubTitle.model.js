@@ -1,20 +1,22 @@
-const mongoose=require("mongoose");
-const SkillSubTitleSchema=mongoose.Schema({
-    subTitle:{
-        type:String,
-        required:true,
-        validate:{
-            validator:(v)=>/^[a-zA-z\s'`]+$/.test(v),
-            message:(props)=>`please enter a valid title title must be a string your provided input${props.value}`
+const mongoose = require("mongoose");
+
+const SubTitleSchema = mongoose.Schema({
+    name: {
+        type: String,
+        required: true,
+        validate: {
+            validator: (v) => /^[a-zA-Z\s'`]+$/.test(v),
+            message: (props) => `Please enter a valid subtitle. Your provided input: ${props.value}`
         }
     },
-    topics:{
-        type:[
-            {
-                type:mongoose.Schema.Types.ObjectId,
-                ref:"Topic"
-            }
-        ]
+    topics: [{
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "Topic"
+    }],
+    postedBy: {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User"
     }
-},{timestamps:true});
-module.exports=mongoose.model("SubTitle",SkillSubTitleSchema);
+}, { timestamps: true });
+
+module.exports = mongoose.model("SubTitle", SubTitleSchema);

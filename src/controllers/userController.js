@@ -22,7 +22,7 @@ async function registerUser(req, res, next) {
         $or: [{ email }, { mobileNo }]
     })
     if (existedUser) {
-        throw new APIError(202, "user already existed")
+        throw new APIError(202, "user already existed","user already existed")
     }
     // console.log(req.files);
     const avtarLocalFilePath = req.files?.avtar ? req.files?.avtar[0]?.path : undefined;
@@ -87,7 +87,8 @@ async function logInUser(req, res, next) {
 
     }
 
-    if (!user?.isPasswordCorrect(password)) {
+    let validatePassowrd=await user.isPasswordCorrect(password);
+    if (!validatePassowrd) {
         throw new APIError(400, "incorrect password", "password does not match");
     }
 

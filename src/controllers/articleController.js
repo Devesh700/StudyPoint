@@ -39,10 +39,10 @@ const { default: mongoose } = require("mongoose");
 
 
  const postArticle=async function(req,res,next){
-    const {title,description}=req.body;
+    const {title,technology,description}=req.body;
 
-    if(!title || !description)
-        throw new APIError(401,"title and description required","insufficient details")
+    if(!title || !description || !technology)
+        throw new APIError(401,"title, description and technology required","insufficient details")
 
     // console.log(req.file)
     // console.log(req.file.post)
@@ -56,6 +56,7 @@ const { default: mongoose } = require("mongoose");
     const article=await Article.create({
         title,
         description,
+        technology,
         postedBy:req.user._id,
         post:post?.secure_url
 
@@ -93,7 +94,7 @@ const { default: mongoose } = require("mongoose");
 const editArticle=async function(req,res,next){
     const _id=req.params._id;
     console.log(req.body);
-    const {title,description}=req.body;
+    const {title,description,technology}=req.body;
     if(!_id )
         throw new APIError(400,"id not found in url","id not found");
 
@@ -117,6 +118,9 @@ const editArticle=async function(req,res,next){
 
     if(description!=undefined)
         updatedData.description=description;
+
+    if(technology!=undefined)
+        updatedData.technology=technology;
 
     if(post!=undefined)
         updatedData.post=post?.secure_url;

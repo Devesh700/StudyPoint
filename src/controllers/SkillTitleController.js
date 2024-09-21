@@ -10,20 +10,21 @@ const SkillTitleModel = require("../models/SkillTitle.model");
 
 
 
-const getSkillTitle=async function(req,res,next){
-    if(!req?.user || !req.user._id)
-        throw new APIError(400,"unauthorized access","unauthorized access");
+const getSkillTitle = async function(req, res, next) {
+    // if (!req?.user || !req.user._id)
+    //     throw new APIError(400, "Unauthorized access", "Unauthorized access");
 
-    let id=req.params.id;
-    if(!id)
-        throw new APIError(400,"required id","invalid access");
+    let id = req.params.id;
+    if (!id)
+        throw new APIError(400, "Required ID", "Invalid access");
 
-    let SkillTitle=await SkillTitleModel.findById(id);
-    if(!SkillTitle)
-        throw new APIError(400,"no skillTitle found by this id","provide a valid id of skilltitle");
+    let skillTitle = await SkillTitleModel.findById(id)
+    if (!skillTitle)
+        throw new APIError(400, "No skillTitle found by this ID", "Provide a valid ID of skillTitle");
 
-    res.status(200).json(new APIResponse(200,SkillTitle,"successfully fetched"))
+    res.status(200).json(new APIResponse(200, skillTitle, "Successfully fetched"));
 }
+
 
 
 
@@ -32,25 +33,30 @@ const getSkillTitle=async function(req,res,next){
 
 
 
-const CreateSkillTitle=async function(req,res,next){
-    if(!req?.user || !req.user._id)
-        throw new APIError(400,"unauthorized access","unauthorized access");
+const CreateSkillTitle = async function(req, res, next) {
+    if (!req?.user || !req.user._id)
+        throw new APIError(400, "Unauthorized access", "Unauthorized access");
 
-    let {title,subTitle}=req.body;
-    let postedBy=req.user._id;
-    console.log(title,subTitle,postedBy)
+    let { title} = req.body;
+    console.log(title)
+    let postedBy = req.user._id;
 
-    if(!title || !subTitle)
-        throw new APIError(401,"please provide title and subTitle both are required","insufficient data");
+    if (!title)
+        throw new APIError(401, "Title and subTitles are required", "Insufficient data");
 
-    let SkillTitle=await SkillTitleModel.create({title,subTitle,postedBy})
+    let skillTitle = await SkillTitleModel.create(
+    { title, postedBy,
+    subTitle:[{name:"Beginner",Topics:[]},
+    {name:"Intermediate",Topics:[]},
+    {name:"Advanced",Topics:[]}] });
 
-    SkillTitle=await SkillTitleModel.findById(SkillTitle?._id);
-    if(!SkillTitle)
-        throw new APIError(400,"error creating skill title","unknown error occured while database creation try again")
+    skillTitle = await SkillTitleModel.findById(skillTitle?._id);
+    if (!skillTitle)
+        throw new APIError(400, "Error creating skill title", "Unknown error occurred while database creation try again");
 
-    return res.status(200).json(new APIResponse(200,SkillTitle,"successfully created"));
+    return res.status(200).json(new APIResponse(200, skillTitle, "Successfully created"));
 }
+
 
 
 
@@ -58,34 +64,31 @@ const CreateSkillTitle=async function(req,res,next){
 
 
 
-const updateSkillTitle=async function(req,res,next){
-    if(!req?.user || !req.user._id)
-        throw new APIError(400,"unauthorized access","unauthorized access");
+const updateSkillTitle = async function(req, res, next) {
+    if (!req?.user || !req.user._id)
+        throw new APIError(400, "Unauthorized access", "Unauthorized access");
 
-    let {title,subTitle}=req.body;
-    let id=req.params?.id
-    if(!id)
-        throw new APIError(400,"required id","invalid access");
+    let { title, subTitle } = req.body;
+    let id = req.params?.id;
 
-    let SkillTitle=await SkillTitleModel.findById(id);
-    if(!SkillTitle)
-        throw new APIError(400,"no skillTitle found by this id","provide a valid id of skilltitle");
+    if (!id)
+        throw new APIError(400, "Required ID", "Invalid access");
 
-    if(title)
-        SkillTitle.title=title;
-    if(subTitle)
-        SkillTitle.subTitle=subTitle;
+    let skillTitle = await SkillTitleModel.findById(id);
+    if (!skillTitle)
+        throw new APIError(400, "No skillTitle found by this ID", "Provide a valid ID of skillTitle");
 
-    const updatedSkillTitle=await SkillTitleModel.findByIdAndUpdate(id,
-        {$set:SkillTitle},
-        {new:true}
-    )
+    if (title) skillTitle.title = title;
+    if (subTitle) {skillTitle.subTitle = subTitle};
 
-    if(!updatedSkillTitle)
-        throw new APIError(400,"error updating skill title","unknown error occured while database creation try again")
+    const updatedSkillTitle = await SkillTitleModel.findByIdAndUpdate(id, { $set: skillTitle }, { new: true })
 
-    res.status(200).json(new APIResponse(200,updatedSkillTitle,"successfully updated"))
+    if (!updatedSkillTitle)
+        throw new APIError(400, "Error updating skill title", "Unknown error occurred while database update try again");
+
+    res.status(200).json(new APIResponse(200, updatedSkillTitle, "Successfully updated"));
 }
+
 
 
 
@@ -94,25 +97,21 @@ const updateSkillTitle=async function(req,res,next){
 
 
 
-const deletSkillTitle=async function(req,res,next){
-    if(!req?.user || !req.user._id)
-        throw new APIError(400,"unauthorized access","unauthorized access");
+const deletSkillTitle = async function(req, res, next) {
+    if (!req?.user || !req.user._id)
+        throw new APIError(400, "Unauthorized access", "Unauthorized access");
 
-    let id=req.params?.id
-    if(!id)
-        throw new APIError(400,"required id","invalid access");
+    let id = req.params?.id;
+    if (!id)
+        throw new APIError(400, "Required ID", "Invalid access");
 
-    let SkillTitle=await SkillTitleModel.findByIdAndDelete(id);
+    let skillTitle = await SkillTitleModel.findByIdAndDelete(id);
+    if (!skillTitle)
+        throw new APIError(400, "No such skill title found", "Invalid ID");
 
-    if(!SkillTitle)
-        throw new APIError(400,"no such skill title found","invalid id")
-
-    const deletedSkillTitle=await SkillTitleModel.findById(SkillTitle?._id,{new:true});
-    if(deletedSkillTitle)
-        throw new APIError(400,"error deleting skill title","unknown error occured while document entry deletion try again")
-
-    return res.status(200).json(new APIResponse(200,SkillTitle,"successfully deleted"));
+    res.status(200).json(new APIResponse(200, skillTitle, "Successfully deleted"));
 }
+
 
 
 
@@ -120,14 +119,15 @@ const deletSkillTitle=async function(req,res,next){
 
 
 
-async function getAllSkillTitle(req,res,next){
-    let _id=req.user?._id;
-    if(!_id ){
-        throw new APIError(400,"log in to fetch articles","unauthorized access")
-    }
-    let skillTitle=await SkillTitleModel.find({postedBy:_id});
-    res.status(200).json(new APIResponse(200,skillTitle,"all skillTitles fetched successfully",true))
+const getAllSkillTitle = async function(req, res, next) {
+    let _id = req.user?._id;
+    if (!_id)
+        throw new APIError(400, "Log in to fetch articles", "Unauthorized access");
+
+    let skillTitles = await SkillTitleModel.find({ postedBy: _id })
+    res.status(200).json(new APIResponse(200, skillTitles, "All skillTitles fetched successfully", true));
 }
+
 
 
 
@@ -136,11 +136,11 @@ async function getAllSkillTitle(req,res,next){
 
 
 
-async function populateAllSkillTItle(req,res,next){
-    
-    let skillTitle=await SkillTitleModel.find({});
-    res.status(200).json(new APIResponse(200,skillTitle,"all skillTitles fetched successfully",true))
+const populateAllSkillTItle = async function(req, res, next) {
+    let skillTitles = await SkillTitleModel.find({})
+    res.status(200).json(new APIResponse(200, skillTitles, "All skillTitles fetched successfully", true));
 }
+
 
 
 module.exports={getSkillTitle,CreateSkillTitle,updateSkillTitle,deletSkillTitle,getAllSkillTitle,populateAllSkillTItle};
