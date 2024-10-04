@@ -5,13 +5,13 @@ const {AsyncHandler,APIError,APIResponse}=require("../../utils/Handlers")
 // GET LOGS
 
 const getLogs=AsyncHandler(async function(req,res,next){
-    if(!req.user && !req.user._id)
+    if(!req.user && !req.user._id && !req.user.admin)
         throw APIError(400,"unauthorized access","you are not authorized to access this data");
 
-    const logs=await Log.find();
+    const logs=await Log.find().sort({timestamp:-1}).limit(50);
     if(!logs)
         throw APIError(400,"databse error","unable to fetch logs try again");
-    res.status(200,logs,"fetched logs successfully");
+    res.status(200).json(new APIResponse(200,logs,"fetched logs successfully"));
 })
 
 
