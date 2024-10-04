@@ -42,7 +42,7 @@ const CreateTopic = async function(req, res, next) {
     if(content){topicData.content=content}
     if(file){topicData.file=file}
 
-    console.log("topicData: ",topicData)
+    //console.log("topicData: ",topicData)
 
     let topic = await TopicModel.create(topicData);
 
@@ -51,11 +51,11 @@ const CreateTopic = async function(req, res, next) {
         throw new APIError(400, "Error creating topic", "Unknown error occurred while database creation, try again");
 
     let Title=await SkillTitleModel.findById(titleId);
-    console.log(Title);
+    //console.log(Title);
     let prevSubtitleTopics=[...Title.subTitle];
-    console.log("level ",level);
+    //console.log("level ",level);
     prevSubtitleTopics=prevSubtitleTopics.filter(subtitle=>subtitle.name===level.value)[0];
-    console.log("prevsubtitletopics",prevSubtitleTopics);
+    //console.log("prevsubtitletopics",prevSubtitleTopics);
     prevSubtitleTopics=[...prevSubtitleTopics.Topics];
     let updatedSubtitleTopics=[...prevSubtitleTopics,{id:topic._id,name:topic.name}];
     let updatedSubTitle=Title.subTitle?.map(subtitle=>{
@@ -64,12 +64,12 @@ const CreateTopic = async function(req, res, next) {
         }
         return subtitle
     })
-    console.log("updated subtitle: ",[...updatedSubTitle])
-    console.log("updated subtitleTopics: ",[...updatedSubTitle[0].Topics])
-    console.log("title subtitle: ",Title.subTitle)
+    //console.log("updated subtitle: ",[...updatedSubTitle])
+    //console.log("updated subtitleTopics: ",[...updatedSubTitle[0].Topics])
+    //console.log("title subtitle: ",Title.subTitle)
     Title.subTitle=updatedSubTitle;
     await Title.save();
-    console.log("title: ",Title.subTitle);
+    //console.log("title: ",Title.subTitle);
 
 
     return res.status(200).json(new APIResponse(200, topic, "Successfully created"));
@@ -254,7 +254,7 @@ module.exports = { getTopic, CreateTopic, updateTopic, deleteTopic, getAllTopic,
 //     file=file?.secure_url || "";
 //     let postedBy=req.user._id;
 //     let topicData={name,subTopics,content,links,file,postedBy};
-//     // console.log(title,subTitle,postedBy)
+//     // //console.log(title,subTitle,postedBy)
 
 //     let Topic=await TopicModel.create(topicData)
 

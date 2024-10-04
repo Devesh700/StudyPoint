@@ -4,6 +4,8 @@ const User = require("../models/User.model");
 require("dotenv").config();
 
 async function verifyUser(req,res,next){
+    //console.log(req)
+    //console.log(req.body)
     
     let accessToken=req.cookies?.accessToken || req.header("Authorization")?.replace
     ("Bearer ","");

@@ -14,7 +14,7 @@ const ArticleSchema=new mongoose.Schema({
         required:[true,"author field required"]
     },
     description:{
-        type:String,
+        type:[],
         required:[true,"content field required"]
     },
     likes:{

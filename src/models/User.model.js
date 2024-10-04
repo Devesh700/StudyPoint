@@ -27,6 +27,13 @@ const UserSchema=new mongoose.Schema({
             message:props=>`${props.value} is not a valid email`
         }
     },
+    journey:[
+        {
+        name:String,
+        skills:[],
+        completed:{type:Number,default:0}
+    }
+    ],
     mobileNo:{
         type:String,
         required:[true,"mobile number field required"],
@@ -54,8 +61,12 @@ const UserSchema=new mongoose.Schema({
     articles:{
         type:[
             {
+                _id:{
                 type:mongoose.Schema.ObjectId,
-                ref:"Artcile"
+                ref:"Article"
+                },
+                name:String,
+                post:String
             }
         ]
     },

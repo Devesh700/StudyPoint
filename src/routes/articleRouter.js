@@ -11,7 +11,7 @@ Router.route("/:_id").put(AsyncHandler(verifyUser),upload.single("post"),AsyncHa
 Router.route("/:_id").delete(AsyncHandler(verifyUser),AsyncHandler(deleteArticle))
 
 
-Router.route("/:_id").get(AsyncHandler(verifyUser),AsyncHandler(getArticleById));
+Router.route("/:_id").get(AsyncHandler(getArticleById));
 
 Router.route("/").get(AsyncHandler(verifyUser),AsyncHandler(getAllArticle));
 

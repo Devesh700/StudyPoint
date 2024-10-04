@@ -5,10 +5,10 @@ const upload=require("../middleware/multer");
 const verifyUser = require("../middleware/isLoggedin");
 const { logInValidator, registerValidator } = require("../../utils/Validators");
 Router.route("/register").post(
-    registerValidator,
     upload.fields(
    [{name:"avtar",maxCount:1},
     {name:"coverImage",maxCount:1}]),
+    registerValidator,
     AsyncHandler(registerUser))
 
 Router.route("/login").post(logInValidator,AsyncHandler(logInUser));

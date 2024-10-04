@@ -39,20 +39,22 @@ const { default: mongoose } = require("mongoose");
 
 
  const postArticle=async function(req,res,next){
-    const {title,technology,description}=req.body;
+    const {title,technology,description}={...req.body};
+     //console.log(req.body)
+     //console.log("title",title,description)
 
     if(!title || !description || !technology)
         throw new APIError(401,"title, description and technology required","insufficient details")
 
-    // console.log(req.file)
-    // console.log(req.file.post)
+    // //console.log(req.file)
+    // //console.log(req.file.post)
     const postPath=req.file? req.file.path :undefined;
-    // console.log("postPath",postPath)
+    // //console.log("postPath",postPath)
 
     let post;
     if(postPath)
         post=await uploadToCloudinary(postPath);
-        // console.log(post)
+        // //console.log(post)
     const article=await Article.create({
         title,
         description,
@@ -68,15 +70,15 @@ const { default: mongoose } = require("mongoose");
         if(!posts)
             posts=[];
 
-        posts.push(article._id);
+        posts.push({_id:article._id,name:article.title,post:article.post});
     const user=await User.findByIdAndUpdate(req.user._id,{
         $set:{
             articles:posts
         }
     })
     const createdArticle=await Article.findById(article._id);
-    // console.log("article",article);
-    // console.log("updatedarticle",createdArticle);
+    // //console.log("article",article);
+    // //console.log("updatedarticle",createdArticle);
     if(!createdArticle)
         throw new APIError(404,"unknow error occured","failed while creating post");
 
@@ -93,7 +95,7 @@ const { default: mongoose } = require("mongoose");
 
 const editArticle=async function(req,res,next){
     const _id=req.params._id;
-    console.log(req.body);
+    //console.log(req.body);
     const {title,description,technology}=req.body;
     if(!_id )
         throw new APIError(400,"id not found in url","id not found");
@@ -154,10 +156,10 @@ const deleteArticle=async function(req,res,next){
     if(!user)
         throw new APIError(400,"invalid user","unauthorized access");
 
-    console.log("old user",user);
+    //console.log("old user",user);
 
     const article=await Article.findByIdAndDelete(_id);
-    console.log(article);
+    //console.log(article);
     if(!article)
         throw new APIError(400,"failed to delete the article","unknown error occured");
 
@@ -165,7 +167,7 @@ const deleteArticle=async function(req,res,next){
     articles=articles.filter(elem=>elem!=_id);
 
     const updatedUser=await User.findByIdAndUpdate(req.user._id,{$set:{articles:articles}},{new:true});
-    console.log(updatedUser);
+    //console.log(updatedUser);
 
     res.status(200).json(new APIResponse(200,updatedUser,"deleted article successfully"));
 }
@@ -178,8 +180,8 @@ const deleteArticle=async function(req,res,next){
 
 async function getAllArticle(req,res,next){
     let _id=req.user?._id;
-    console.log(req.user);
-    console.log(_id, typeof(_id));
+    //console.log(req.user);
+    //console.log(_id, typeof(_id));
     if(!_id ){
         throw new APIError(400,"log in to fetch articles","unauthorized access")
     }

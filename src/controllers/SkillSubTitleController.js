@@ -104,7 +104,7 @@ const deletSkillSubTitle = async function(req, res, next) {
     let Title=await SkillTitleModel.findById(titleId)
     if(!Title)
         throw new APIError(400, "No such Title found", "Invalid TitleId");
-        console.log(Title)
+        //console.log(Title)
     let subTitles=[...Title.subTitles];
     subTitles=subTitles.filter(subTitleId=>subTitleId!=id);
 

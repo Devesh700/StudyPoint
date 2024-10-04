@@ -76,7 +76,7 @@ if (cluster.isPrimary) {
             // Error handling middleware
             app.use((err, req, res, next) => {
                 console.error(err.stack);
-                res.status(500).send({err, message: err.stack.split("\n") });
+                res.status(500).send({message:err.message, stack: err.stack.split("\n") });
             });
 
             const server = app.listen(PORT, () => {

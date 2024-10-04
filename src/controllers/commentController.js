@@ -108,7 +108,7 @@ const deleteComment=async function(req,res,next){
         throw new APIError(400,"no comment available at this post","invalid access");
 
     const deletedComment=await Comment.findByIdAndDelete(commentData._id)
-    console.log(deletedComment);
+    //console.log(deletedComment);
     if(!deletedComment)
         throw new APIError(400,"unknown error occured while deleting comment","database error");
 
@@ -130,8 +130,8 @@ const deleteComment=async function(req,res,next){
 
 async function getAllComment(req,res,next){
     let _id=req.user?._id;
-    console.log(req.user);
-    console.log(_id, typeof(_id));
+    //console.log(req.user);
+    //console.log(_id, typeof(_id));
     if(!_id ){
         throw new APIError(400,"log in to fetch comments","unauthorized access")
     }

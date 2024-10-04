@@ -1,4 +1,5 @@
 const User = require("../models/User.model");
+const mongoose=require("mongoose")
 const upload = require("../middleware/multer");
 const jwt=require("jsonwebtoken")
 const { AsyncHandler, APIError, APIResponse } = require("../../utils/Handlers");
@@ -13,7 +14,7 @@ const uploadToCloudinary = require("../../utils/Cloudinary");
 
 
 async function registerUser(req, res, next) {
-    console.log(req.body);
+    //console.log(req.body);
     let { email, fullName, password, mobileNo } = req.body;
     if ([email, fullName, password, mobileNo].some((val) => val?.trim() === "")) {
         throw new APIError(401, "All fields are reqruired")
@@ -24,13 +25,13 @@ async function registerUser(req, res, next) {
     if (existedUser) {
         throw new APIError(202, "user already existed","user already existed")
     }
-    // console.log(req.files);
+    // //console.log(req.files);
     const avtarLocalFilePath = req.files?.avtar ? req.files?.avtar[0]?.path : undefined;
     const coverImageLocalFilePath = req.files?.coverImage ? req.files?.coverImage[0]?.path : undefined;
     let avtar, coverImage;
     if (avtarLocalFilePath)
         avtar = await uploadToCloudinary(avtarLocalFilePath);
-    console.log(avtar);
+    //console.log(avtar);
     if (coverImageLocalFilePath)
         coverImage = await uploadToCloudinary(coverImageLocalFilePath);
     try {
@@ -44,9 +45,9 @@ async function registerUser(req, res, next) {
         })
         const createdUser = await User.findById(user._id).select("-password -refreshToken");
         let{accessToken,refreshToken}=await generateTokens(user._id);
-        console.log(createdUser);
+        //console.log(createdUser);
         if (createdUser) {
-            res.status(201).cookie("accessToken",accessToken).cookie("refreshToken",refreshToken).json(new APIResponse(201, {createdUser,accessToken}, "user registered successfully", true));
+            res.status(201).cookie("accessToken",accessToken).cookie("refreshToken",refreshToken).json(new APIResponse(201, {user:createdUser,accessToken}, "user registered successfully", true));
         }
         else {
             res.status(500).json(new APIError(500, [], "something went wrong while registering user"));
@@ -55,7 +56,7 @@ async function registerUser(req, res, next) {
         res.status(502).json(new APIError(502, "something went wrong while registering user", err.message))
         console.error(err)
     }
-    console.log(avtar);
+    //console.log(avtar);
 
 }
 
@@ -70,7 +71,7 @@ async function registerUser(req, res, next) {
 
 async function logInUser(req, res, next) {
     let { email, password } = req.body;
-    console.log(req.body);
+    //console.log(req.body);
 
     if (email === undefined || password === undefined)
         throw new APIError(400, "all fields are required", "does not receive necessary fields ")
@@ -80,7 +81,7 @@ async function logInUser(req, res, next) {
     }
 
     let user = await User.findOne({ email });
-    console.log(user);
+    //console.log(user);
 
     if (!user) {
         throw new APIError(400, "user does not exist", "credentials provided does not exist in our database");
@@ -99,7 +100,7 @@ async function logInUser(req, res, next) {
         httpOnly:true,
         secure:true
     }
-    console.log(loggedInUser)
+    //console.log(loggedInUser)
     res.status(200)
     .cookie("accessToken",accessToken,options)
     .cookie("refreshToken",refreshToken,options)
@@ -116,7 +117,8 @@ async function logInUser(req, res, next) {
 
 
 async function updateUser (req,res,next){
-    let {fullName,email,mobileNo,password}=req.body;
+    let {fullName,email,mobileNo,password,journey}=req.body;
+    // //console.log("body:",req.body)
     if(!req.user?._id){
         throw new APIError(401,"user did not received while updating the user","invalid user");
     }
@@ -137,6 +139,19 @@ async function updateUser (req,res,next){
     if(mobileNo!==undefined)
         updateFields.mobileNo=mobileNo;
 
+    if(journey!==undefined){
+        if( !user.journey?.some(elem=>elem?.name===journey.name)){
+        updateFields.journey=user.journey? [...user.journey,journey]:journey
+        }
+        else{
+            
+            let journeyval=user?.journey?.map(elem=>{if(elem.name===journey.name){return journey} else return elem})
+            updateFields.journey=[...journeyval];
+        //console.log("journey: ",journey)
+        //console.log(updateFields.journey)
+        }
+        }
+
     if(req.files?.avtar){
         avtarLocalFilePath=req.files.avtar[0].path;
         let avtar;
@@ -144,13 +159,16 @@ async function updateUser (req,res,next){
             avtar=await uploadToCloudinary(avtarLocalFilePath);
         updateFields.avtar=avtar?.secure_url;
     }
-    
+    const {accessToken,refreshToken}=await generateTokens(user._id);
     const updatedUser=await User.findByIdAndUpdate(req.user?._id,
         {$set:updateFields},
         {new:true,select:("-password -refreshToken"),runValidators:true}
     );
 
-    res.status(200).json(new APIResponse(200,updatedUser,"updated successfully",true));
+    // //console.log("updatedUser")
+    // //console.log(updatedUser)
+
+    res.status(200).json(new APIResponse(200,{user:updatedUser,accessToken},"updated successfully",true));
 
 }
 
@@ -164,10 +182,16 @@ async function updateUser (req,res,next){
 
 async function getUserById(req,res,next){
     const _id=req.params._id;
+    //console.log(_id)
+    //console.log(req.user._id)
     if(!_id)
         throw new APIError(400,"please provide a valid id","invalid id");
-
-    const user=await User.findById(_id).select("-password -refreshToken -mobileNo");
+    let user;
+    if(req.user._id.equals(new mongoose.Types.ObjectId(_id)))
+    user=await User.findById(_id).select("-password ")
+    // user=await User.findById(_id).select("-password ").populate({path:"articles._id",model:"Article"});
+    else
+    user=await User.findById(_id).select("-password -refreshToken -mobileNo");
 
     if(!user)
         throw new APIError(404,"please provide a valid id","invalid id no user found");
@@ -192,7 +216,7 @@ async function changePassword(req,res,next){
 
     let user=await User.findById(req.user._id);
     let isPasswordCorrect=await user.isPasswordCorrect(oldPassword);
-    console.log("isPasswordCorrect:",isPasswordCorrect)
+    //console.log("isPasswordCorrect:",isPasswordCorrect)
     if(!isPasswordCorrect)
         throw new APIError(401,"invalid credentials","incorrect password");
 

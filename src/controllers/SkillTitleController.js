@@ -38,7 +38,7 @@ const CreateSkillTitle = async function(req, res, next) {
         throw new APIError(400, "Unauthorized access", "Unauthorized access");
 
     let { title} = req.body;
-    console.log(title)
+    //console.log(title)
     let postedBy = req.user._id;
 
     if (!title)
