@@ -20,7 +20,7 @@ const { default: mongoose } = require("mongoose");
     if(!_id)
         throw new APIError(400,"please provide a valid id","invalid id");
 
-    const article=await Article.findById(_id);
+    const article=await Article.findById(_id).populate('likes');
 
     if(!article)
         throw new APIError(404,"please provide a valid id","invalid id no article found");
@@ -76,7 +76,7 @@ const { default: mongoose } = require("mongoose");
             articles:posts
         }
     })
-    const createdArticle=await Article.findById(article._id);
+    const createdArticle=await Article.findById(article._id).populate('likes');
     // //console.log("article",article);
     // //console.log("updatedarticle",createdArticle);
     if(!createdArticle)
@@ -129,7 +129,7 @@ const editArticle=async function(req,res,next){
 
     const updatedArticle=await Article.findByIdAndUpdate(_id,{
         $set:updatedData
-    },{new:true})
+    },{new:true}).populate('likes')
 
     res.status(200).json(new APIResponse(200, updatedArticle, "article updated successfully"));
     
@@ -166,7 +166,7 @@ const deleteArticle=async function(req,res,next){
     let articles=[...user.articles];
     articles=articles.filter(elem=>elem!=_id);
 
-    const updatedUser=await User.findByIdAndUpdate(req.user._id,{$set:{articles:articles}},{new:true});
+    const updatedUser=await User.findByIdAndUpdate(req.user._id,{$set:{articles:articles}},{new:true}).populate('likes');
     //console.log(updatedUser);
 
     res.status(200).json(new APIResponse(200,updatedUser,"deleted article successfully"));
@@ -185,7 +185,7 @@ async function getAllArticle(req,res,next){
     if(!_id ){
         throw new APIError(400,"log in to fetch articles","unauthorized access")
     }
-    let article=await Article.find({postedBy:_id});
+    let article=await Article.find({postedBy:_id}).populate('likes');
     res.status(200).json(new APIResponse(200,article,"all articles fetched successfully",true))
 }
 
@@ -198,7 +198,7 @@ async function getAllArticle(req,res,next){
 
 async function populateAllArticle(req,res,next){
     
-    let article=await Article.find({});
+    let article=await Article.find({}).populate('likes');
     res.status(200).json(new APIResponse(200,article,"all articles fetched successfully",true))
 }
 

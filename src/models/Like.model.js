@@ -12,7 +12,7 @@ const likeSchema=mongoose.Schema({
         type:String,
         required:true
     },
-    article:{
+    articleId:{
         type:mongoose.Schema.Types.ObjectId,
         required:true
     }

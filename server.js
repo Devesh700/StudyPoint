@@ -7,6 +7,7 @@ const articleRouter = require("./src/routes/articleRouter");
 const SkillTitleRouter = require("./src/routes/skillTitleRouter");
 const subTitleRouter = require("./src/routes/subTitleRouter");
 const topicRouter = require("./src/routes/topicRouter");
+const likeRouter = require("./src/routes/likeRouter");
 const { getLogs, createLogs } = require("./src/controllers/logController");
 const cluster = require("cluster");
 const os = require("os");
@@ -57,7 +58,31 @@ if (cluster.isPrimary) {
     }));
 
     app.use((req, res, next) => {
+        console.log("Request received:", req.path);
         createLogs(req, res, next);
+    });
+
+    // Middleware to log the response
+    app.use((req, res, next) => {
+        // Save references to original res.send and res.json
+        const originalSend = res.send;
+        const originalJson = res.json;
+
+        // Override res.send
+        res.send = function (data) {
+            // console.log("Response sent:", data);
+            // Call the original send method
+            return originalSend.call(this, data);
+        };
+
+        // Override res.json
+        res.json = function (data) {
+            // console.log("Response sent (JSON):", data);
+            // Call the original json method
+            return originalJson.call(this, data);
+        };
+
+        next();
     });
 
     // Database connection
@@ -72,11 +97,16 @@ if (cluster.isPrimary) {
             app.use("/api/v1/subtitle", subTitleRouter);
             app.use("/api/v1/topics", topicRouter);
             app.get("/api/v1/logs", verifyUser, getLogs);
+            app.use("/api/v1/like", likeRouter);
 
             // Error handling middleware
             app.use((err, req, res, next) => {
-                console.error(err.stack);
-                res.status(500).send({message:err.message, stack: err.stack.split("\n") });
+                if (err) {
+                    console.error(err.stack);
+                    res.status(500).send({ ok: false, message: err.message, stack: err.stack.split("\n") });
+                } else {
+                    console.log("Response generated", res);
+                }
             });
 
             const server = app.listen(PORT, () => {
