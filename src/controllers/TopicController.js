@@ -155,7 +155,7 @@ async function getAllTopic(req, res, next) {
 
 // POPULATE ALL
 async function populateAllTopic(req, res, next) {
-    let topics = await TopicModel.find({}).populate('subTopics');
+    let topics = await TopicModel.find({}).sort({createdAt:1}).populate('subTopics');
     res.status(200).json(new APIResponse(200, topics, "All topics fetched successfully", true));
 }
 

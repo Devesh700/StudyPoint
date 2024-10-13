@@ -185,7 +185,7 @@ async function getAllArticle(req,res,next){
     if(!_id ){
         throw new APIError(400,"log in to fetch articles","unauthorized access")
     }
-    let article=await Article.find({postedBy:_id}).populate('likes');
+    let article=await Article.find({postedBy:_id}).sort({createdAt:-1}).populate('likes');
     res.status(200).json(new APIResponse(200,article,"all articles fetched successfully",true))
 }
 
@@ -197,8 +197,16 @@ async function getAllArticle(req,res,next){
 
 
 async function populateAllArticle(req,res,next){
-    
-    let article=await Article.find({}).populate('likes');
+    const query=req.url.split('?');
+    let queryString="";
+    query?.forEach((val,index)=>index!==0?queryString+=val:queryString+"");
+    const url=new URLSearchParams(queryString);
+    console.log(url);
+    console.log(url.get("skip"));
+    const populate=url.get("populate");
+    const skip=url.get("skip")*6;
+    console.log(skip);
+    let article=await Article.find({}).skip(skip).sort({createdAt:-1}).populate({path:"postedBy", select:"fullName _id"});
     res.status(200).json(new APIResponse(200,article,"all articles fetched successfully",true))
 }
 

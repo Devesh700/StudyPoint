@@ -124,7 +124,7 @@ const getAllSkillTitle = async function(req, res, next) {
     if (!_id)
         throw new APIError(400, "Log in to fetch articles", "Unauthorized access");
 
-    let skillTitles = await SkillTitleModel.find({ postedBy: _id })
+    let skillTitles = await SkillTitleModel.find({ postedBy: _id }).sort({createdAt:1})
     res.status(200).json(new APIResponse(200, skillTitles, "All skillTitles fetched successfully", true));
 }
 
@@ -137,7 +137,7 @@ const getAllSkillTitle = async function(req, res, next) {
 
 
 const populateAllSkillTItle = async function(req, res, next) {
-    let skillTitles = await SkillTitleModel.find({})
+    let skillTitles = await SkillTitleModel.find({}).sort({createdAt:1})
     res.status(200).json(new APIResponse(200, skillTitles, "All skillTitles fetched successfully", true));
 }
 

@@ -4,6 +4,7 @@ const upload = require("../middleware/multer");
 const jwt=require("jsonwebtoken")
 const { AsyncHandler, APIError, APIResponse } = require("../../utils/Handlers");
 const uploadToCloudinary = require("../../utils/Cloudinary");
+const UserModel = require("../models/User.model");
 
 
 
@@ -43,7 +44,10 @@ async function registerUser(req, res, next) {
             avtar: avtar?.secure_url,
             coverImage: coverImage?.secure_url
         })
-        const createdUser = await User.findById(user._id).select("-password -refreshToken");
+        const createdUser = await User.findById(user._id)  .populate([
+    { path: 'following', select: 'fullName _id avtar' },
+    { path: 'followers', select: 'fullName _id avtar' }
+  ]).select("-password -refreshToken");
         let{accessToken,refreshToken}=await generateTokens(user._id);
         //console.log(createdUser);
         if (createdUser) {
@@ -94,7 +98,10 @@ async function logInUser(req, res, next) {
     }
 
     const {accessToken,refreshToken}=await generateTokens(user._id);
-    const loggedInUser=await User.findById(user._id).select("-password -refreshToken");
+    const loggedInUser=await User.findById(user._id)  .populate([
+    { path: 'following', select: 'fullName _id avtar' },
+    { path: 'followers', select: 'fullName _id avtar' }
+  ]).select("-password -refreshToken");
 
     const options={
         httpOnly:true,
@@ -117,7 +124,7 @@ async function logInUser(req, res, next) {
 
 
 async function updateUser (req,res,next){
-    let {fullName,email,mobileNo,password,journey}=req.body;
+    let {fullName,email,mobileNo,password,journey,following}=req.body;
     // //console.log("body:",req.body)
     if(!req.user?._id){
         throw new APIError(401,"user did not received while updating the user","invalid user");
@@ -138,6 +145,24 @@ async function updateUser (req,res,next){
 
     if(mobileNo!==undefined)
         updateFields.mobileNo=mobileNo;
+
+    if(following!==undefined){
+        let prevFollowings=[...user?.following];
+        console.log(prevFollowings[0],following,prevFollowings[0]==following?._id, prevFollowings[0]===following?._id)
+        let existed=prevFollowings?.find(val=>val==following?._id);
+        console.log("existed",existed)
+        console.log("follow",following?.follow);
+        console.log(updateFields)
+        if(!existed && following?.follow){
+        updateFields.following=[...new Set([...prevFollowings,following?._id])]
+    console.log("updated fields",updateFields?.following)   
+        }
+        else if(existed && !following?.follow){
+            updateFields.following=[...new Set([...prevFollowings?.filter(elem=>elem.toString()!==following?._id)])];
+            console.log("updateFields remove ",updateFields);
+            console.log("updateFields remove ",prevFollowings);
+        }
+    }
 
     if(journey!==undefined){
         if( !user.journey?.some(elem=>elem?.name===journey.name)){
@@ -163,7 +188,35 @@ async function updateUser (req,res,next){
     const updatedUser=await User.findByIdAndUpdate(req.user?._id,
         {$set:updateFields},
         {new:true,select:("-password -refreshToken"),runValidators:true}
-    );
+    )  .populate([
+    { path: 'following', select: 'fullName _id avtar' },
+    { path: 'followers', select: 'fullName _id avtar' }
+  ]);
+
+    // console.log("following",following)
+    // console.log("user following",[...updatedUser?.following])
+    // console.log([...following]==[...updatedUser?.following])
+    if(updateFields?.following){
+        let followedUser=await UserModel.findById(following).select("-password");
+        console.log("before update",followedUser);
+        let follower=[...followedUser?.followers];
+        console.log("iterated");
+        let existed=follower?.find(val=>{console.log(val,req.user?._id);return val.toString()==req.user?._id.toString()});
+        console.log(existed,!existed && following?.follow)
+        if(!existed && following?.follow){
+            console.log("pushing");
+            follower.push(req.user?._id);
+            followedUser.followers=[...new Set(follower)];
+            await followedUser.save();
+            console.log("updated",followedUser);
+        }
+        else if(existed && !following?.follow){
+            follower=follower?.filter(elem=>elem.toString()!=req.user?._id);
+             followedUser.followers=[...new Set(follower)];
+            await followedUser.save();
+            console.log("updated",followedUser);
+        }
+    }
 
     // //console.log("updatedUser")
     // //console.log(updatedUser)
@@ -181,17 +234,23 @@ async function updateUser (req,res,next){
 
 
 async function getUserById(req,res,next){
-    const _id=req.params._id;
-    //console.log(_id)
-    //console.log(req.user._id)
-    if(!_id)
+    const _id=req.params._id || req?.user?._id;
+    if(!_id && !req?.user?._id)
         throw new APIError(400,"please provide a valid id","invalid id");
     let user;
-    if(req.user._id.equals(new mongoose.Types.ObjectId(_id)))
+    if(req?.user?._id?.equals(new mongoose.Types.ObjectId(_id)))
     user=await User.findById(_id).select("-password ")
+.populate([
+    { path: 'following', select: 'fullName _id' },
+    { path: 'followers', select: 'fullName _id avtar' }
+  ])
     // user=await User.findById(_id).select("-password ").populate({path:"articles._id",model:"Article"});
     else
-    user=await User.findById(_id).select("-password -refreshToken -mobileNo");
+    user=await User.findById(_id).select("-password -refreshToken -mobileNo")
+    .populate([
+    { path: 'following', select: 'fullName _id' },
+    { path: 'followers', select: 'fullName _id avtar' }
+  ])
 
     if(!user)
         throw new APIError(404,"please provide a valid id","invalid id no user found");

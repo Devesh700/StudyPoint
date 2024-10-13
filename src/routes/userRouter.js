@@ -19,7 +19,9 @@ Router.route("/updateuser").put(AsyncHandler(verifyUser),AsyncHandler(updateUser
 
 Router.route("/changepassword").patch(AsyncHandler(verifyUser),AsyncHandler(changePassword))
 
-Router.route("/:_id").get(AsyncHandler(verifyUser),AsyncHandler(getUserById))
+Router.route("/:_id").get(AsyncHandler(getUserById))
+
+Router.route("/").get(AsyncHandler(verifyUser),AsyncHandler(getUserById))
 
 
 module.exports=Router;
