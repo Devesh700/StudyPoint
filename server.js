@@ -35,15 +35,21 @@ if (cluster.isPrimary) {
     });
 
     // Graceful shutdown of primary process
-    process.on("SIGTERM", () => {
-        console.log("Primary process received SIGTERM. Shutting down workers...");
-        for (const id in cluster.workers) {
+    // Graceful shutdown of primary process
+process.on("SIGTERM", () => {
+    console.log("Primary process received SIGTERM. Shutting down workers...");
+    for (const id in cluster.workers) {
+        if (cluster.workers[id]) {  // Check if the worker still exists
             cluster.workers[id].send("shutdown");
             setTimeout(() => {
-                cluster.workers[id].kill("SIGKILL");
+                if (cluster.workers[id]) {  // Check again before killing
+                    cluster.workers[id].kill("SIGKILL");
+                }
             }, 5000);
         }
-    });
+    }
+});
+
 
 } else {
     const app = express();
